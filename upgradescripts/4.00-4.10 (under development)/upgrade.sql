@@ -2546,3 +2546,29 @@ BEGIN
 	VALUES (N'rewardpointssettings.maximumrewardpointstouseperorder', N'0', 0)
 END
 GO
+
+ --new table
+IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[PictureBinary]') and OBJECTPROPERTY(object_id, N'IsUserTable') = 1)
+BEGIN
+	CREATE TABLE [dbo].[PictureBinary]
+    (
+		[Id] int IDENTITY(1,1) NOT NULL,
+		[PictureId] int,
+		[BinaryData] [varbinary](max) NULL,		
+		PRIMARY KEY CLUSTERED 
+		(
+			[Id] ASC
+		) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON)
+	)
+
+	--copy exists data
+	INSERT INTO [dbo].[PictureBinary](PictureId, BinaryData)
+	SELECT [Id], [PictureBinary] FROM [dbo].[Picture]
+
+END
+GO
+
+ALTER TABLE [dbo].[PictureBinary] WITH CHECK ADD CONSTRAINT [PictureBinary_Picture] FOREIGN KEY(PictureId)
+REFERENCES [dbo].[Picture] ([Id])
+GO
+

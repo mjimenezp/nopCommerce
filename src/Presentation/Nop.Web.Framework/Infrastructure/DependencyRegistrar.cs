@@ -247,6 +247,9 @@ namespace Nop.Web.Framework.Infrastructure
             else
                 builder.RegisterType<PictureService>().As<IPictureService>().InstancePerLifetimeScope();
 
+            //picture binary service
+            builder.RegisterType<PictureBinaryService>().As<IPictureBinaryService>().InstancePerLifetimeScope();
+
             //installation service
             if (!DataSettingsHelper.DatabaseIsInstalled())
             {

@@ -6,11 +6,6 @@ namespace Nop.Core.Domain.Media
     public partial class Picture : BaseEntity
     {
         /// <summary>
-        /// Gets or sets the picture binary
-        /// </summary>
-        public byte[] PictureBinary { get; set; }
-
-        /// <summary>
         /// Gets or sets the picture mime type
         /// </summary>
         public string MimeType { get; set; }

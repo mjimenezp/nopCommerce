@@ -926,7 +926,6 @@ namespace Nop.Data.Tests
         {
             return new Picture
             {
-                PictureBinary = new byte[] { 1, 2, 3 },
                 MimeType = MimeTypes.ImagePJpeg,
                 SeoFilename = "seo filename 1",
                 AltAttribute = "AltAttribute 1",

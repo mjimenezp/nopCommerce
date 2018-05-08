@@ -42,6 +42,7 @@ namespace Nop.Services.Media
         private readonly MediaSettings _mediaSettings;
         private readonly IDataProvider _dataProvider;
         private readonly INopFileProvider _fileProvider;
+        private readonly IPictureBinaryService _pictureBinaryService;
 
         #endregion
 
@@ -69,7 +70,8 @@ namespace Nop.Services.Media
             IEventPublisher eventPublisher,
             MediaSettings mediaSettings,
             IDataProvider dataProvider,
-            INopFileProvider fileProvider)
+            INopFileProvider fileProvider,
+            IPictureBinaryService pictureBinaryService)
         {
             this._pictureRepository = pictureRepository;
             this._productPictureRepository = productPictureRepository;
@@ -81,6 +83,7 @@ namespace Nop.Services.Media
             this._mediaSettings = mediaSettings;
             this._dataProvider = dataProvider;
             this._fileProvider = fileProvider;
+            this._pictureBinaryService = pictureBinaryService;
         }
 
         #endregion
@@ -302,8 +305,9 @@ namespace Nop.Services.Media
                 throw new ArgumentNullException(nameof(picture));
 
             var result = fromDb
-                ? picture.PictureBinary
+                ? _pictureBinaryService.GetPictureBinaryByPictureId(picture.Id).BinaryData
                 : LoadPictureFromFile(picture.Id, picture.MimeType);
+
             return result;
         }
 
@@ -622,6 +626,7 @@ namespace Nop.Services.Media
                 DeletePictureOnFileSystem(picture);
 
             //delete from database
+            _pictureBinaryService.DeletePictureBinary(picture.Id);
             _pictureRepository.Delete(picture);
 
             //event notification
@@ -693,14 +698,14 @@ namespace Nop.Services.Media
 
             var picture = new Picture
             {
-                PictureBinary = StoreInDb ? pictureBinary : new byte[0],
                 MimeType = mimeType,
                 SeoFilename = seoFilename,
                 AltAttribute = altAttribute,
                 TitleAttribute = titleAttribute,
-                IsNew = isNew,
+                IsNew = isNew
             };
             _pictureRepository.Insert(picture);
+            _pictureBinaryService.InsertPictureBinary(picture.Id, StoreInDb ? pictureBinary : new byte[0]);
 
             if (!StoreInDb)
                 SavePictureInFile(picture.Id, pictureBinary, mimeType);
@@ -742,8 +747,7 @@ namespace Nop.Services.Media
             //delete old thumbs if a picture has been changed
             if (seoFilename != picture.SeoFilename)
                 DeletePictureThumbs(picture);
-
-            picture.PictureBinary = StoreInDb ? pictureBinary : new byte[0];
+           
             picture.MimeType = mimeType;
             picture.SeoFilename = seoFilename;
             picture.AltAttribute = altAttribute;
@@ -751,6 +755,7 @@ namespace Nop.Services.Media
             picture.IsNew = isNew;
 
             _pictureRepository.Update(picture);
+            _pictureBinaryService.UpdatePictureBinary(pictureId, StoreInDb ? pictureBinary : new byte[0]);
 
             if (!StoreInDb)
                 SavePictureInFile(picture.Id, pictureBinary, mimeType);
@@ -905,7 +910,7 @@ namespace Nop.Services.Media
                                 //now on file system
                                 SavePictureInFile(picture.Id, pictureBinary, picture.MimeType);
                             //update appropriate properties
-                            picture.PictureBinary = value ? pictureBinary : new byte[0];
+                            _pictureBinaryService.UpdatePictureBinary(picture.Id, value ? pictureBinary : new byte[0]);
                             picture.IsNew = true;
                             //raise event?
                             //_eventPublisher.EntityUpdated(picture);

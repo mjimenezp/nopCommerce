@@ -76,7 +76,8 @@ namespace Nop.Services.Media
             MediaSettings mediaSettings,
             NopConfig config,
             IDataProvider dataProvider,
-            INopFileProvider fileProvider)
+            INopFileProvider fileProvider,
+            IPictureBinaryService pictureBinaryService)
             : base(pictureRepository,
                 productPictureRepository,
                 settingService,
@@ -86,7 +87,8 @@ namespace Nop.Services.Media
                 eventPublisher,
                 mediaSettings,
                 dataProvider,
-                fileProvider)
+                fileProvider,
+                pictureBinaryService)
         {
             this._cacheManager = cacheManager;
             this._mediaSettings = mediaSettings;
