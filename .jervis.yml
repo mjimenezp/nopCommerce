@@ -9,7 +9,7 @@ variables:
   - BuildConfiguration='Release'
   - AdditionalMsBuildParameter=' /m /p:DebugSymbols=true '
   - GIT_TRACE=1
-  - SolutionList='NetTestProject.sln'
+  - SolutionList='src/NopCommerce.sln'
 
 branches:
   only:
