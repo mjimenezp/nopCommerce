@@ -35,6 +35,7 @@ function Get-OutputhPath {
 
 function Get-ProjectsPath {
  param( [string]$SolutionFile)
+ Write-Host "Solution file get project path: $SolutionFile"
  $result= Get-Content $SolutionFile | Select-String "Project\(" |
       ForEach-Object {
         $projectParts=$_ -Split '[,=]' | ForEach-Object { $_.Trim('[ "{}]')};
@@ -91,17 +92,23 @@ foreach($solutionPath in $solutionList){
   Write-Host "---Build process ended---"
 
   ####################Collect artifacts#################################
-  $SolutionFile="$($currentDir.path)\$solutionPath"
+  $SolutionFile=[System.IO.Path]::Combine("$($currentDir.path)", ("$solutionPath" -replace  "/","`\"))
+  $BaseSolutionDir= [System.IO.Path]::GetDirectoryName("$SolutionFile")
   $BasePath=$currentDir
-
+  Write-Host "---- $($currentDir.path)"
+  Write-Host "---- $solutionPath"
+  Write-Host "---- $SolutionFile"
   $projects= Get-ProjectsPath -SolutionFile $SolutionFile
   
   Foreach($project in $projects){
     $IsWebProject=$FALSE
     $projectFolder=Split-Path -Path "$BasePath\$($project.File)"
-    $outputPath=Get-OutputhPath -BasePath $BasePath -Project $project -BuildConfiguration $BuildConfiguration
-    Write-Host $project.Name
+    Write-Host "**********************************$($project.Name) build step******************************************"
     Write-Host $projectFolder;
+    Write-Host $BasePath;
+    Write-Host $BaseSolutionDir;
+    
+    $outputPath=Get-OutputhPath -BasePath $BasePath -Project $project -BuildConfiguration $BuildConfiguration
     Write-Host "Out: $outputPath";
     
     $namespace=@{default="http://schemas.microsoft.com/developer/msbuild/2003" }

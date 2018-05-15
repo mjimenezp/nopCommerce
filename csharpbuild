@@ -13,7 +13,7 @@ pipeline {
             agent {
                 node{
                     label 'stable && windows && vs2017 && ec2'
-                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                    customWorkspace "C:/jk/${JOB_NAME}/b${BUILD_NUMBER}"
                 }
             }
             steps{
@@ -24,7 +24,7 @@ pipeline {
             agent {
                 node{
                     label 'stable && windows && vs2017 && ec2'
-                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                    customWorkspace "C:/jk/${JOB_NAME}/b${BUILD_NUMBER}"
                 }
             }
             steps{
@@ -35,7 +35,7 @@ pipeline {
             agent {
                 node{
                     label 'stable && windows && vs2017 && ec2'
-                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                    customWorkspace "C:/jk/${JOB_NAME}/b${BUILD_NUMBER}"
                 }
             }
             steps {
@@ -50,7 +50,7 @@ pipeline {
             agent {
                 node{
                     label 'stable && windows && vs2017 && ec2'
-                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                    customWorkspace "C:/jk/${JOB_NAME}/b${BUILD_NUMBER}"
                 }
             }
             steps {

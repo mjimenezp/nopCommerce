@@ -15,6 +15,7 @@ Write-Host "SolutionList : $solutionList"
 #####################################Functions################################################################################################
 function Get-ProjectsPath {
     param( [string]$SolutionFile)
+    Write-Host "Solution file get project path: $SolutionFile"
     $result= Get-Content $SolutionFile | Select-String "Project\(" |
          ForEach-Object {
            $projectParts=$_ -Split '[,=]' | ForEach-Object { $_.Trim('[ "{}]')};
@@ -71,11 +72,21 @@ if(Test-Path $outputTestDir){
   }
 
 foreach($solutionPath in $solutionList){
-    $SolutionFile="$($currentDir.path)\$solutionPath"
+    $SolutionFile=[System.IO.Path]::Combine("$($currentDir.path)", ("$solutionPath" -replace  "/","`\"))
+    $BaseSolutionDir= [System.IO.Path]::GetDirectoryName("$SolutionFile")
     $BasePath=$currentDir
+    Write-Host "---- $($currentDir.path)"
+    Write-Host "---- $solutionPath"
+    Write-Host "---- $SolutionFile"
     $projects= Get-ProjectsPath -SolutionFile $SolutionFile
+
     Foreach($project in $projects){
         $projectFolder=Split-Path -Path "$BasePath\$($project.File)"
+        Write-Host "**********************************$($project.Name)  unit test******************************************"
+        Write-Host $projectFolder;
+        Write-Host $BasePath;
+        Write-Host $BaseSolutionDir;
+
         $outputPath=Get-OutputhPath -BasePath $BasePath -Project $project -BuildConfiguration $BuildConfiguration
 
         $namespace=@{default="http://schemas.microsoft.com/developer/msbuild/2003" }
