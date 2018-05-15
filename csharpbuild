@@ -1,0 +1,94 @@
+#!groovy
+import org.yaml.snakeyaml.Yaml
+
+pipeline {
+    agent none
+    environment {
+        BuildConfiguration = getVariable('BuildConfiguration', 'debug')
+        AdditionalMsBuildParameter = getVariable('AdditionalMsBuildParameter', ' /m')
+        SolutionList = getVariable('SolutionList', 'default.sln')
+    }
+    stages {
+        stage('Setup environment'){
+            agent {
+                node{
+                    label 'stable && windows && vs2017 && ec2'
+                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                }
+            }
+            steps{
+                powershell '.\\BuildScripts\\setup-environment.ps1'
+            }
+        }
+        stage('Nuget Restore') {
+            agent {
+                node{
+                    label 'stable && windows && vs2017 && ec2'
+                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                }
+            }
+            steps{
+                powershell '.\\BuildScripts\\restore_nuget.ps1'
+            }
+        }
+        stage('Build .Net Solution') {
+            agent {
+                node{
+                    label 'stable && windows && vs2017 && ec2'
+                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                }
+            }
+            steps {
+                echo "Workspace dir is ${pwd()}"
+                echo "Workspace dir is ${BUILD_NUMBER}"
+                echo "Workspace dir is ${env.SolutionList}"
+                powershell '.\\BuildScripts\\build_ci.ps1'
+                archiveArtifacts artifacts: 'JenkinsBuildOutput/*.zip'
+            }
+        }
+        stage('Execute unit tests') {
+            agent {
+                node{
+                    label 'stable && windows && vs2017 && ec2'
+                    customWorkspace "C:/jk/b${BUILD_NUMBER}"
+                }
+            }
+            steps {
+                powershell '.\\BuildScripts\\execute-unittest.ps1'
+                junit '/JenkinsTestOutput/**/*.test.xml'
+                archive '/JenkinsTestOutput/**/*.trx'
+            }
+        }
+    }
+}
+
+
+class State {
+    static Boolean loaded = false
+    static Map<String, String> variables = [:]
+}
+
+/**
+ * If Jenkins shows errors like
+ * "Scripts not permitted to use new org.yaml.snakeyaml.Yaml"
+ * Then you need to approve signatures on this page for local installation:
+ * http://localhost:8080/scriptApproval/
+ *
+ * or for sandbox
+ * http://jervis-sandbox2.devfactory.com/scriptApproval/
+ */
+def getVariable(String name, String defaultValue = '') {
+    if (! State.loaded) {
+        def rawYml = readFile file: '.jervis.yml', encoding: 'UTF-8'
+        def parser = new Yaml()
+        def list = parser.load(rawYml)
+        def vars = list['variables'] ?: [:]
+        vars.each{ variable ->
+            // def (key, value) = variable.tokenize('=')
+            def (key, value) = variable.split('=',2)
+            State.variables[key] = value
+        }
+        State.loaded = true
+    }
+    return State.variables[name] ?: defaultValue
+}

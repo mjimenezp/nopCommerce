@@ -1,0 +1,6 @@
+docker-host:
+  children:
+    192.168.3.21
+
+env:
+ - ANSIBLE_VAULT_PASSWORD_FILE=.ansible-vault-password

@@ -1,0 +1,38 @@
+language: shell
+
+env:
+  global:
+      - JERVIS_SERVER_IMAGE_BASE_URL=registry2.swarm.devfactory.com/aurea/central/jervis/server
+      - DOCKER_HOST=tcp://dlb1.aureacentral.com:2375
+
+variables:
+  - BuildConfiguration='Release'
+  - AdditionalMsBuildParameter=' /m /p:DebugSymbols=true '
+  - GIT_TRACE=1
+  - SolutionList='NetTestProject.sln'
+
+branches:
+  only:
+    - master
+    - release
+    - develop
+    - feature
+cache:
+  directories:
+    - packages
+
+before_install:
+  - echo "Before Install"
+
+after_success:
+  - echo "It worked"
+
+script:
+  - echo "Script phase"
+
+jenkins:
+  pipeline_jenkinsfile: csharpbuild
+  stash:
+    allowEmpty: true
+  collect:
+    artifacts: 'install_artifact.dummy'
