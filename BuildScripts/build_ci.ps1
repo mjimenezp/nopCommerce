@@ -102,17 +102,20 @@ foreach($solutionPath in $solutionList){
   
   Foreach($project in $projects){
     $IsWebProject=$FALSE
-    $projectFolder=Split-Path -Path "$BasePath\$($project.File)"
-    Write-Host "**********************************$($project.Name) build step******************************************"
+    $projectFolder=Split-Path -Path "$BaseSolutionDir\$($project.File)"
+    Write-Host "**********************************Project artifact collect: $($project.Name)******************************************"
     Write-Host $projectFolder;
     Write-Host $BasePath;
     Write-Host $BaseSolutionDir;
     
-    $outputPath=Get-OutputhPath -BasePath $BasePath -Project $project -BuildConfiguration $BuildConfiguration
+    $outputPath=Get-OutputhPath -BasePath $BaseSolutionDir -Project $project -BuildConfiguration $BuildConfiguration
     Write-Host "Out: $outputPath";
     
     $namespace=@{default="http://schemas.microsoft.com/developer/msbuild/2003" }
-    $valueContent= Select-Xml -Path "$BasePath\$($project.File)" -Xpath "/default:Project/default:PropertyGroup/default:ProjectTypeGuids/text()" -Namespace $namespace   | Select-Object -Expand node | Select-Object -Expand Value
+    Write-Host "++++++current file proj: $BasePath\$($project.File)" 
+    Write-Host "++++++current file proj: $projectFolder\$($project.File)" 
+    Write-Host "++++++current file proj: $BaseSolutionDir\$($project.File)" 
+    $valueContent= Select-Xml -Path "$BaseSolutionDir\$($project.File)" -Xpath "/default:Project/default:PropertyGroup/default:ProjectTypeGuids/text()" -Namespace $namespace   | Select-Object -Expand node | Select-Object -Expand Value
     Write-Host "Content for Project Type Guid:"
     Write-Host $valueContent
     if ($valueContent) { 
